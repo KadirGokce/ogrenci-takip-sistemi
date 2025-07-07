@@ -33,6 +33,7 @@
       "bundleIdentifier": "com.flemingvincent.ExpoSupabaseStarter"
     },
     "android": {
+      "package": "com.flemingvincent.ExpoSupabaseStarter",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png"
       },
