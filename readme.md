@@ -1,27 +1,138 @@
-# Expo Supabase Starter
+# Turbo Repo Setup
 
-![social-preview-dark](https://github.com/user-attachments/assets/9697a7da-10aa-4661-bb76-b5bc0dd611f0)
+Bu proje, Turbo repo kullanarak monorepo yapısında kurulmuş bir uygulama koleksiyonudur.
 
-## Introduction
+## Proje Yapısı
 
-This repository serves as a comprehensive starter project for developing React Native and Expo applications with Supabase as the backend. It integrates various technologies such as Expo Router for navigation, Tailwind CSS for styling, React-Hook-Form for form handling, Zod for schema validation, and TypeScript for type safety. By leveraging these powerful tools, this starter template provides a robust foundation for building modern, scalable, and efficient mobile applications.
+```
+├── apps/
+│   ├── mobile/          # React Native (Expo) uygulaması
+│   └── api/             # Hono.js API sunucusu
+├── packages/
+│   ├── schemas/         # Paylaşılan Zod şemaları
+│   ├── typescript-config/ # Paylaşılan TypeScript konfigürasyonu
+│   └── eslint-config/   # Paylaşılan ESLint konfigürasyonu
+├── package.json         # Root package.json
+└── turbo.json          # Turbo konfigürasyonu
+```
 
-#### Disclaimer
+## Kurulum
 
-This is not supposed to be a template, boilerplate or a framework. It is an opinionated guide that shows how to do some things in a certain way. You are not forced to do everything exactly as it is shown here, decide what works best for you and your team and stay consistent with your style.
+```bash
+# Bağımlılıkları yükle
+yarn install
 
-## Table of Contents
+# Tüm projeleri build et
+yarn build
 
-- [💻 Application Overview](docs/application-overview.md)
-- [⚙️ Project Configuration](docs/project-configuration.md)
-- [🗄️ Project Structure](docs/project-structure.md)
-- [🧱 Components And Styling](docs/components-and-styling.md)
-- [🗃️ State Management](docs/state-management.md)
+# Geliştirme modunda çalıştır
+yarn dev
+```
 
-## Contributing
+## Projeler
 
-Contributions to this starter project are highly encouraged and welcome! If you have any suggestions, bug reports, or feature requests, please feel free to create an issue or submit a pull request. Let's work together to enhance the developer experience and make it easier for everyone to build exceptional Expo applications with Supabase.
+### Mobile App (React Native + Expo)
+- **Konum**: `apps/mobile/`
+- **Teknoloji**: React Native, Expo, TypeScript
+- **Çalıştırma**: `yarn workspace @repo/mobile start`
 
-## License
+### API Server (Hono.js)
+- **Konum**: `apps/api/`
+- **Teknoloji**: Hono.js, TypeScript
+- **Çalıştırma**: `yarn workspace @repo/api dev`
+- **Port**: 3000
 
-This repository is licensed under the MIT License. You are granted the freedom to use, modify, and distribute the code for personal or commercial purposes. For more details, please refer to the [LICENSE](https://github.com/FlemingVincent/supabase-starter/blob/main/LICENSE) file.
+### Shared Schemas
+- **Konum**: `packages/schemas/`
+- **Teknoloji**: Zod
+- **Kullanım**: Hem mobile hem API tarafında type-safe veri doğrulama
+
+## Type-Safe API İletişimi
+
+### Shared Schemas Kullanımı
+
+```typescript
+// packages/schemas/src/index.ts
+import { z } from "zod";
+
+export const LoginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
+export const UserSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  name: z.string().min(1),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+```
+
+### API'de Kullanım
+
+```typescript
+// apps/api/src/index.ts
+import { LoginSchema, UserSchema } from "@repo/schemas";
+
+app.post("/auth/login", async (c) => {
+  const body = await c.req.json();
+  const validatedData = LoginSchema.parse(body); // Type-safe validation
+  // ...
+});
+```
+
+### Mobile'da Kullanım
+
+```typescript
+// apps/mobile/src/services/api.ts
+import { LoginSchema, type Login } from "@repo/schemas";
+
+const login = async (data: Login) => {
+  const validatedData = LoginSchema.parse(data);
+  // API çağrısı...
+};
+```
+
+## Komutlar
+
+```bash
+# Tüm projeleri build et
+yarn build
+
+# Geliştirme modunda çalıştır
+yarn dev
+
+# Lint kontrolü
+yarn lint
+
+# Temizlik
+yarn clean
+
+# Format
+yarn format
+```
+
+## Workspace Komutları
+
+```bash
+# Sadece mobile'ı çalıştır
+yarn workspace @repo/mobile start
+
+# Sadece API'yi çalıştır
+yarn workspace @repo/api dev
+
+# Schemas'ı build et
+yarn workspace @repo/schemas build
+```
+
+## Özellikler
+
+- ✅ Turbo repo ile monorepo yönetimi
+- ✅ Yarn workspaces
+- ✅ Type-safe API iletişimi (Zod)
+- ✅ Paylaşılan şemalar
+- ✅ Hono.js API sunucusu
+- ✅ React Native (Expo) mobile uygulaması
+- ✅ TypeScript desteği
+- ✅ ESLint konfigürasyonu 
