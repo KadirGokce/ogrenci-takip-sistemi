@@ -19,7 +19,7 @@ export default function AppLayout() {
 					options={{
 						presentation: "modal",
 						headerShown: true,
-						headerTitle: "Sign Up",
+						headerTitle: "Kayıt Ol",
 						headerStyle: {
 							backgroundColor:
 								colorScheme === "dark"
@@ -38,7 +38,7 @@ export default function AppLayout() {
 					options={{
 						presentation: "modal",
 						headerShown: true,
-						headerTitle: "Sign In",
+						headerTitle: "Giriş Yap",
 						headerStyle: {
 							backgroundColor:
 								colorScheme === "dark"

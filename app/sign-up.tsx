@@ -12,28 +12,28 @@ import { useAuth } from "@/context/supabase-provider";
 
 const formSchema = z
 	.object({
-		email: z.string().email("Please enter a valid email address."),
+		username: z
+			.string()
+			.min(3, "Kullanıcı adı en az 3 karakter olmalıdır.")
+			.max(50, "Kullanıcı adı en fazla 50 karakter olabilir.")
+			.regex(/^[a-zA-Z0-9_@.-]+$/, "Kullanıcı adı sadece harf, rakam, alt çizgi, @, nokta ve tire içerebilir."),
 		password: z
 			.string()
-			.min(8, "Please enter at least 8 characters.")
-			.max(16, "Please enter fewer than 16 characters.")
+			.min(8, "Şifre en az 8 karakter olmalıdır.")
+			.max(16, "Şifre en fazla 16 karakter olabilir.")
 			.regex(
 				/^(?=.*[a-z])/,
-				"Your password must have at least one lowercase letter.",
+				"Şifrenizde en az bir küçük harf olmalıdır.",
 			)
 			.regex(
 				/^(?=.*[A-Z])/,
-				"Your password must have at least one uppercase letter.",
+				"Şifrenizde en az bir büyük harf olmalıdır.",
 			)
-			.regex(/^(?=.*[0-9])/, "Your password must have at least one number."),
-			// .regex(
-			// 	/^(?=.*[!@#$%^&*])/,
-			// 	"Your password must have at least one special character.",
-			// ),
-		confirmPassword: z.string().min(8, "Please enter at least 8 characters."),
+			.regex(/^(?=.*[0-9])/, "Şifrenizde en az bir rakam olmalıdır."),
+		confirmPassword: z.string().min(8, "Şifre en az 8 karakter olmalıdır."),
 	})
 	.refine((data) => data.password === data.confirmPassword, {
-		message: "Your passwords do not match.",
+		message: "Şifreler eşleşmiyor.",
 		path: ["confirmPassword"],
 	});
 
@@ -43,7 +43,7 @@ export default function SignUp() {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			email: "",
+			username: "",
 			password: "",
 			confirmPassword: "",
 		},
@@ -51,47 +51,46 @@ export default function SignUp() {
 
 	async function onSubmit(data: z.infer<typeof formSchema>) {
 		try {
-			await signUp(data.email, data.password);
+			await signUp(data.username, data.password);
 			form.reset();
 		} catch (error: any) {
 			console.error("Sign up error:", error);
 			
 			// Show user-friendly error message
-			let errorMessage = "An error occurred during sign up. Please try again.";
+			let errorMessage = "Kayıt olurken bir hata oluştu. Lütfen tekrar deneyin.";
 			
 			if (error?.message) {
 				if (error.message.includes("User already registered")) {
-					errorMessage = "An account with this email already exists. Please try signing in instead.";
+					errorMessage = "Bu kullanıcı adı zaten kullanılıyor. Lütfen farklı bir kullanıcı adı deneyin.";
 				} else if (error.message.includes("Password should be at least")) {
-					errorMessage = "Password must be at least 6 characters long.";
+					errorMessage = "Şifre en az 6 karakter olmalıdır.";
 				} else if (error.message.includes("Invalid email")) {
-					errorMessage = "Please enter a valid email address.";
+					errorMessage = "Lütfen geçerli bir kullanıcı adı girin.";
 				} else {
 					errorMessage = error.message;
 				}
 			}
 			
-			Alert.alert("Sign Up Error", errorMessage);
+			Alert.alert("Kayıt Hatası", errorMessage);
 		}
 	}
 
 	return (
 		<SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
 			<View className="flex-1 gap-4 web:m-4">
-				<H1 className="self-start">Sign Up</H1>
+				<H1 className="self-start">Kayıt Ol</H1>
 				<Form {...form}>
 					<View className="gap-4">
 						<FormField
 							control={form.control}
-							name="email"
+							name="username"
 							render={({ field }) => (
 								<FormInput
-									label="Email"
-									placeholder="Email"
+									label="Kullanıcı Adı"
+									placeholder="Kullanıcı adınızı girin"
 									autoCapitalize="none"
-									autoComplete="email"
+									autoComplete="username"
 									autoCorrect={false}
-									keyboardType="email-address"
 									{...field}
 								/>
 							)}
@@ -101,8 +100,8 @@ export default function SignUp() {
 							name="password"
 							render={({ field }) => (
 								<FormInput
-									label="Password"
-									placeholder="Password"
+									label="Şifre"
+									placeholder="Şifrenizi girin"
 									autoCapitalize="none"
 									autoCorrect={false}
 									secureTextEntry
@@ -115,8 +114,8 @@ export default function SignUp() {
 							name="confirmPassword"
 							render={({ field }) => (
 								<FormInput
-									label="Confirm Password"
-									placeholder="Confirm password"
+									label="Şifre Tekrar"
+									placeholder="Şifrenizi tekrar girin"
 									autoCapitalize="none"
 									autoCorrect={false}
 									secureTextEntry
@@ -137,7 +136,7 @@ export default function SignUp() {
 				{form.formState.isSubmitting ? (
 					<ActivityIndicator size="small" />
 				) : (
-					<Text>Sign Up</Text>
+					<Text>Kayıt Ol</Text>
 				)}
 			</Button>
 		</SafeAreaView>

@@ -11,11 +11,14 @@ import { H1 } from "@/components/ui/typography";
 import { useAuth } from "@/context/supabase-provider";
 
 const formSchema = z.object({
-	email: z.string().email("Please enter a valid email address."),
+	username: z
+		.string()
+		.min(3, "Kullanıcı adı en az 3 karakter olmalıdır.")
+		.max(50, "Kullanıcı adı en fazla 50 karakter olabilir."),
 	password: z
 		.string()
-		.min(8, "Please enter at least 8 characters.")
-		.max(64, "Please enter fewer than 64 characters."),
+		.min(8, "Şifre en az 8 karakter olmalıdır.")
+		.max(64, "Şifre en fazla 64 karakter olabilir."),
 });
 
 export default function SignIn() {
@@ -24,52 +27,51 @@ export default function SignIn() {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			email: "",
+			username: "",
 			password: "",
 		},
 	});
 
 	async function onSubmit(data: z.infer<typeof formSchema>) {
 		try {
-			await signIn(data.email, data.password);
+			await signIn(data.username, data.password);
 			form.reset();
 		} catch (error: any) {
 			console.error("Sign in error:", error);
 			
 			// Show user-friendly error message
-			let errorMessage = "An error occurred during sign in. Please try again.";
+			let errorMessage = "Giriş yaparken bir hata oluştu. Lütfen tekrar deneyin.";
 			
 			if (error?.message) {
 				if (error.message.includes("Invalid login credentials")) {
-					errorMessage = "Invalid email or password. Please check your credentials and try again.";
+					errorMessage = "Kullanıcı adı veya şifre hatalı. Lütfen bilgilerinizi kontrol edin.";
 				} else if (error.message.includes("Email not confirmed")) {
-					errorMessage = "Please check your email and confirm your account before signing in.";
+					errorMessage = "Lütfen e-posta adresinizi kontrol edin ve hesabınızı onaylayın.";
 				} else {
 					errorMessage = error.message;
 				}
 			}
 			
-			Alert.alert("Sign In Error", errorMessage);
+			Alert.alert("Giriş Hatası", errorMessage);
 		}
 	}
 
 	return (
 		<SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
 			<View className="flex-1 gap-4 web:m-4">
-				<H1 className="self-start ">Sign In</H1>
+				<H1 className="self-start ">Giriş Yap</H1>
 				<Form {...form}>
 					<View className="gap-4">
 						<FormField
 							control={form.control}
-							name="email"
+							name="username"
 							render={({ field }) => (
 								<FormInput
-									label="Email"
-									placeholder="Email"
+									label="Kullanıcı Adı"
+									placeholder="Kullanıcı adınızı girin"
 									autoCapitalize="none"
-									autoComplete="email"
+									autoComplete="username"
 									autoCorrect={false}
-									keyboardType="email-address"
 									{...field}
 								/>
 							)}
@@ -79,8 +81,8 @@ export default function SignIn() {
 							name="password"
 							render={({ field }) => (
 								<FormInput
-									label="Password"
-									placeholder="Password"
+									label="Şifre"
+									placeholder="Şifrenizi girin"
 									autoCapitalize="none"
 									autoCorrect={false}
 									secureTextEntry
@@ -101,7 +103,7 @@ export default function SignIn() {
 				{form.formState.isSubmitting ? (
 					<ActivityIndicator size="small" />
 				) : (
-					<Text>Sign In</Text>
+					<Text>Giriş Yap</Text>
 				)}
 			</Button>
 		</SafeAreaView>

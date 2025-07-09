@@ -16,8 +16,8 @@ SplashScreen.preventAutoHideAsync();
 type AuthState = {
 	initialized: boolean;
 	session: Session | null;
-	signUp: (email: string, password: string) => Promise<void>;
-	signIn: (email: string, password: string) => Promise<void>;
+	signUp: (username: string, password: string) => Promise<void>;
+	signIn: (username: string, password: string) => Promise<void>;
 	signOut: () => Promise<void>;
 };
 
@@ -31,16 +31,34 @@ export const AuthContext = createContext<AuthState>({
 
 export const useAuth = () => useContext(AuthContext);
 
+// Helper function to convert username to email format if needed
+const formatUsernameAsEmail = (username: string) => {
+	// If username already contains @, use it as is
+	if (username.includes('@')) {
+		return username;
+	}
+	// Otherwise, append a domain
+	return `${username}@app.local`;
+};
+
 export function AuthProvider({ children }: PropsWithChildren) {
 	const [initialized, setInitialized] = useState(false);
 	const [session, setSession] = useState<Session | null>(null);
 	const router = useRouter();
 
-	const signUp = async (email: string, password: string) => {
+	const signUp = async (username: string, password: string) => {
 		try {
+			// Format username as email if needed
+			const email = formatUsernameAsEmail(username);
+			
 			const { data, error } = await supabase.auth.signUp({
-				email,
+				email: email,
 				password,
+				options: {
+					data: {
+						username: username, // Store original username in user metadata
+					}
+				}
 			});
 
 			if (error) {
@@ -60,10 +78,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
 		}
 	};
 
-	const signIn = async (email: string, password: string) => {
+	const signIn = async (username: string, password: string) => {
 		try {
+			// Format username as email if needed
+			const email = formatUsernameAsEmail(username);
+			
 			const { data, error } = await supabase.auth.signInWithPassword({
-				email,
+				email: email,
 				password,
 			});
 
