@@ -9,6 +9,7 @@ import {
   ApiResponseSchema,
   type User 
 } from "@repo/schemas";
+import { serve } from "@hono/node-server";
 
 const app = new Hono();
 
@@ -22,85 +23,6 @@ app.get("/health", (c) => {
   return c.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// Auth routes
-app.post("/auth/login", async (c) => {
-  try {
-    const body = await c.req.json();
-    const validatedData = LoginSchema.parse(body);
-    
-    // Mock authentication logic
-    const mockUser: User = {
-      id: "123e4567-e89b-12d3-a456-426614174000",
-      email: validatedData.email,
-      name: "Test User",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const response = ApiResponseSchema(UserSchema).parse({
-      success: true,
-      data: mockUser,
-    });
-
-    return c.json(response);
-  } catch (error) {
-    const response = ApiResponseSchema(UserSchema).parse({
-      success: false,
-      error: "Invalid login data",
-    });
-    return c.json(response, 400);
-  }
-});
-
-app.post("/auth/register", async (c) => {
-  try {
-    const body = await c.req.json();
-    const validatedData = RegisterSchema.parse(body);
-    
-    // Mock registration logic
-    const mockUser: User = {
-      id: "123e4567-e89b-12d3-a456-426614174000",
-      email: validatedData.email,
-      name: validatedData.name,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const response = ApiResponseSchema(UserSchema).parse({
-      success: true,
-      data: mockUser,
-    });
-
-    return c.json(response);
-  } catch (error) {
-    const response = ApiResponseSchema(UserSchema).parse({
-      success: false,
-      error: "Invalid registration data",
-    });
-    return c.json(response, 400);
-  }
-});
-
-// User routes
-app.get("/users/:id", async (c) => {
-  const userId = c.req.param("id");
-  
-  // Mock user data
-  const mockUser: User = {
-    id: userId,
-    email: "user@example.com",
-    name: "Test User",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  const response = ApiResponseSchema(UserSchema).parse({
-    success: true,
-    data: mockUser,
-  });
-
-  return c.json(response);
-});
 
 // API documentation
 app.get("/", (c) => {
@@ -116,4 +38,10 @@ app.get("/", (c) => {
   });
 });
 
-export default app; 
+export default app;
+
+const port = 3000;
+if (require.main === module) {
+  serve({ fetch: app.fetch, port });
+  console.log(`Server running on http://localhost:${port}`);
+} 

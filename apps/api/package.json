@@ -10,6 +10,7 @@
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
   "dependencies": {
+    "@hono/node-server": "^1.16.0",
     "@repo/schemas": "workspace:*",
     "hono": "^4.0.5",
     "zod": "^3.22.4"
@@ -20,4 +21,4 @@
     "tsx": "^4.7.1",
     "typescript": "^5.3.3"
   }
-} 
+}
