@@ -52,9 +52,14 @@ export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =
     }),
   });
 
+export const TestCreateSchema = z.object({
+  name: z.string().min(1, "'name' alanı zorunludur")
+});
+
 // Export types
 export type User = z.infer<typeof UserSchema>;
 export type CreateUser = z.infer<typeof CreateUserSchema>;
 export type UpdateUser = z.infer<typeof UpdateUserSchema>;
 export type Login = z.infer<typeof LoginSchema>;
-export type Register = z.infer<typeof RegisterSchema>; 
+export type Register = z.infer<typeof RegisterSchema>;
+export type TestCreate = z.infer<typeof TestCreateSchema>; 
